@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 from textblob import TextBlob
 import re
-
 nltk.download('stopwords')
 df = pd.read_csv('data/McDonald_s_Reviews.csv', encoding='latin-1')
 stop_words = set(stopwords.words('english'))
