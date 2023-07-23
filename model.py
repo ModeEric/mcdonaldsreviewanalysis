@@ -6,6 +6,8 @@ import pandas as pd
 from nltk.corpus import stopwords
 import nltk
 import re
+from sklearn.metrics import accuracy_score
+
 nltk.download('stopwords')
 
 model = BertForSequenceClassification.from_pretrained("bert-base-uncased")
@@ -38,6 +40,13 @@ class McDonaldsDataset(torch.utils.data.Dataset):
 train_dataset = McDonaldsDataset(train_encodings, train_labels.tolist())
 val_dataset = McDonaldsDataset(val_encodings, val_labels.tolist())
 
+def compute_metrics(pred):
+    labels = pred.label_ids
+    preds = pred.predictions.argmax(-1)
+    acc = accuracy_score(labels, preds)
+    return {
+        'accuracy': acc,
+    }
 training_args = TrainingArguments(
     output_dir='./results',
     num_train_epochs=3,
@@ -53,7 +62,12 @@ trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=train_dataset,
-    eval_dataset=val_dataset
-)
+    eval_dataset=val_dataset,    
+    compute_metrics=compute_metrics
 
+)
 trainer.train()
+
+eval_result = trainer.evaluate()
+
+print(f"Accuracy on validation set: {eval_result['eval_accuracy']}")
